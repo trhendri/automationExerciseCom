@@ -306,7 +306,7 @@ describe("Text Case 7", () => {
     });
 });
 
-describe.only("Text Case 8", () => {
+describe("Text Case 8", () => {
     it("Verify All Products and product detail page", async () => {
         //Launch Browser, Nav to url, verify page is visible
         const browserUrl = page.browserUrl;
@@ -332,22 +332,168 @@ describe.only("Text Case 8", () => {
         await expect(productInfo).toBeDisplayed();
     });
 });
-describe("Text Case 9", () => {
+xdescribe("Text Case 9", () => {
     it("Search Product", async () => {
         //Launch Browser, Nav to url, verify page is visible
+        await page.startUpPage();
         //Click on 'Products' button and verify user is navigated to 'All Products page successfully
+        const productsBtn = await $(page.productsBtn);
+        await productsBtn.click();
+        const allProductsTitle = await $(page.allProductsTitle);
+        const productsList = await $(page.productsList);
+        await expect(allProductsTitle).toHaveText("ALL PRODUCTS");
+        await expect(productsList).toBeDisplayed();
         //Enter product name in search input and click search button,
+
+        const productsSearchInput = await $(page.productsSearchInput);
+        const productsSearchButton = await $(page.productsSearchButton);
+        await productsSearchInput.setValue("shirt");
+        const searchTerm = await productsSearchInput.getValue();
+        console.log(searchTerm);
+        await productsSearchButton.click();
+
         //Verify 'Searched Products' is visible;
+        const searchedProductsTitle = await $(page.searchedProductsTitle);
+        await expect(searchedProductsTitle).toHaveText("SEARCHED PRODUCTS");
+
         //Verify all the products related to search are visible
+        const displayedProducts = await $$(page.displayedProducts);
+
+        //toHaveText(expect.stringContaining('test framework for Node.js'))
+
+        /*
+        for (const product of displayedProducts) {
+           // console.log(displayedProductsItemName);
+         
+           // await expect(displayedProductsItemName).toHaveText(await expect.stringContaining(searchTerm));
+           await expect(displayedProductsItemName).toHaveText(new RegExp(searchTerm));
+        }
+           */
+        //*! Figure out this For Of Loop. Its iterating over the same item but needs to cycle through all.
+
+        for (const product of displayedProducts) {
+            // Find the product name inside the product container
+            const displayedProductsItemName = await product.$(page.displayedProductsItemName);
+
+            if (!searchTerm) {
+                console.log("No product name found for this product.");
+                continue; // Skip to the next product if no name is found
+            }
+
+            // Get the text of the product name
+            const productText = await displayedProductsItemName.getText();
+            console.log(productText);
+
+            // Check if the product text contains the search term
+            await expect(productText).toMatch(new RegExp(searchTerm));
+        }
     });
 });
 
-describe("Text Case 10", () => {
+describe.only("Text Case 10", () => {
     it("Verify Subscription in home page", async () => {
         //Launch Browser, Nav to url, verify page is visible
+        await page.startUpPage();
         // Scroll down to footer,
+        const footer = await $(page.footer);
+        await footer.scrollIntoView();
         //Verify text 'SUBSCRIPTION'
+
+        const subscriptionText = await $(page.subscriptionText);
+        await expect(subscriptionText).toHaveText("SUBSCRIPTION");
+
         //Enter email address in input and click arrow button,
         //Verify success message ' You have been successfully subscribed!' is visible
+
+        const footerSubscribeEmailInput = await $(page.footerSubscribeEmailField);
+        const validEmailAddress = page.validEmailAddress;
+        const footerSubscribeSubmitBtn = await $(page.footerSubscribeSubmitBtn);
+
+        await footerSubscribeEmailInput.setValue(validEmailAddress);
+        await footerSubscribeSubmitBtn.click();
+
+        const footerSubscribeSuccess = await $(page.footerSubscribeSuccess);
+        await footerSubscribeSuccess.waitForDisplayed();
+
+        await expect(footerSubscribeSuccess).toBeDisplayed();
+        console.log(await footerSubscribeSuccess.getText());
+
+        await expect(footerSubscribeSuccess).toHaveText("You have been successfully subscribed!");
+    });
+});
+
+describe("Test Case 11", () => {
+    it("Verify Subscription in Cart page", async () => {
+        //Launch Browser, Nav to url, verify page is visible
+        //Click 'Cart' button, Scroll down to footer, Verify text "Subscription"
+        //Enter email address in input and click arrow button.
+        //Verify success message 'You have been successfully subscribed!' is visible
+        console.log("test");
+    });
+});
+
+describe("Test Case 12", () => {
+    it("Add Products in Cart", async () => {
+        //Launch browser, nav to url, verify page is visible
+        //click 'Products' button, Hover over first product and click 'Add to cart',
+        //Click 'Continue Shopping' button, Hover over second product and click 'Add to cart',
+        //Click 'View Cart' button, Verify both products are added to Cart
+        //Verify their prices, quantity and total price
+    });
+});
+
+describe("Test Case 13", () => {
+    it("Verify product quantity in Cart", async () => {
+        //Launch browser, nav to url , verify home page is visible
+        //Click 'View Product' for any product on home page, verify product detail is opened
+        //Increase quantity to 4, Click 'Add to cart' button, click 'View cart ' button,
+        //Verify that product is displayed in cart page with exact quantity
+    });
+});
+
+describe("Test Case 14", () => {
+    it("Place Order: Register while Checkout", async () => {
+        //Launch browser, nav to url, verify homepage is visible
+        //Add products to cart, click 'Cart' button, Verify that cart page is displayed
+        //Click Proceed to Checkout, click 'Register/Login' button,
+        //Fill all details in signup and create account, Verify 'ACCOUNT CREATED'
+        //Click 'Continue' button, Verify 'Logged in as username' at top
+        //Click 'Cart' button, Click 'Proceed to Checkout' button, Verify Address Details and Review Your Order
+        //Enter description in comment text area and click 'Place Order',
+        //Enter payment details: Name on Card, Card number, CVC, Expiration date,
+        //Click 'Pay and Confirm Order' button, Verify success message 'Your order has been placed successfully!'
+        //Click 'Delete Account' button, Verify 'ACCOUNT DELETED! and click ' Continue button
+    });
+});
+
+describe("Test Case 15", () => {
+    it("Place Order: Register before Checkout", async () => {
+        // Launch browser, Navigate to url 'http://automationexercise.com', Verify that home page is visible successfully
+        // Click 'Signup / Login' button, Fill all details in Signup and create account, Verify 'ACCOUNT CREATED!' and click 'Continue' button
+        //Verify ' Logged in as username' at top
+        //Add products to cart, Click 'Cart' button, Verify that cart page is displayed
+        //Click Proceed To Checkout, Verify Address Details and Review Your Order
+        //Enter description in comment text area and click 'Place Order', Enter payment details: Name on Card, Card Number, CVC, Expiration date,
+        //Click 'Pay and Confirm Order' button, Verify success message 'Your order has been placed successfully!'
+        //Click 'Delete Account' button, Verify 'ACCOUNT DELETED!' and click 'Continue' button
+    });
+});
+
+describe("Test Case 16", () => {
+    it("Place Order: Login before Checkout", async () => {
+        //1. Launch browser, Navigate to url 'http://automationexercise.com', Verify that home page is visible successfully
+        //Click 'Signup / Login' button,  Fill email, password and click 'Login' button, Verify 'Logged in as username' at top
+        //Add products to cart, Click 'Cart' button, Verify that cart page is displayed
+        //Click Proceed To Checkout, Verify Address Details and Review Your Order
+        // Enter description in comment text area and click 'Place Order', Enter payment details: Name on Card, Card Number, CVC, Expiration date,
+        // Click 'Pay and Confirm Order' button, Verify success message 'Your order has been placed successfully!'
+        //Click 'Delete Account' button, Verify 'ACCOUNT DELETED!' and click 'Continue' button
+    });
+});
+describe("Test Case 17", () => {
+    it("Remove Products From Cart", async () => {
+        //Launch browser, Navigate to url 'http://automationexercise.com', Verify that home page is visible successfully
+        //  Add products to cart, Click 'Cart' button, Verify that cart page is displayed
+        //Click 'X' button corresponding to particular product, Verify that product is removed from the cart
     });
 });

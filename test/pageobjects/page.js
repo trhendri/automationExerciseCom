@@ -46,32 +46,37 @@ module.exports = {
     logoutBtn: '//a[@href ="/logout"]',
     //loggedInAsText2: '.shop-menu > ul> li', //[9]
 
-   //Contact Us Page
-contactUsBtn: '//a[@href="/contact_us"]',
-contactFormTitle: '.contact-form h2',
- // Contact Us Form
- contactUsNameField:'//input[@name = "name"]',
- contactUsEmailField:'//input[@name = "email"]',
- contactUsSubjectField: '//input[@name = "subject"]',
- contactUsMessageField: '//textarea[@name = "message"]',
-contactUsUploadFileBtn:'//input[@name = "upload_file"]',
-contactUsSubmitBtn : '//input[@name = "submit"]',
-homeBtn: ' .btn-success',
+    //Contact Us Page
+    contactUsBtn: '//a[@href="/contact_us"]',
+    contactFormTitle: ".contact-form h2",
+    // Contact Us Form
+    contactUsNameField: '//input[@name = "name"]',
+    contactUsEmailField: '//input[@name = "email"]',
+    contactUsSubjectField: '//input[@name = "subject"]',
+    contactUsMessageField: '//textarea[@name = "message"]',
+    contactUsUploadFileBtn: '//input[@name = "upload_file"]',
+    contactUsSubmitBtn: '//input[@name = "submit"]',
+    homeBtn: " .btn-success",
 
+    //Test Cases Page
+    testCasesBtn: '//a[@href="/test_cases"]',
 
-//Test Cases Page
-testCasesBtn: '//a[@href="/test_cases"]',
+    //Products
+    productsBtn: '//a[@href="/products"]',
+    allProductsTitle: ".features_items>h2",
+    productsList: ".features_items",
+    productsSearchInput: '//input[@name="search"]',
+    productsSearchButton: '//button[@id="submit_search"]',
+    searchedProductsTitle: ".features_items>h2",
+    displayedProducts: ".product-image-wrapper",
+    displayedProductsItemName: " .product-image-wrapper p",
 
-//Products
-productsBtn: '//a[@href="/products"]',
-allProductsTitle: '.features_items>h2',
-productsList: '.features_items',
-productsSearchInput: '',
-productsSearchButton: '',
-
-
-
-
+    //Subscription on HomePage
+    footer: "#footer",
+    subscriptionText: ".single-widget>h2",
+    footerSubscribeEmailField: "#susbscribe_email",
+    footerSubscribeSubmitBtn: '//button[@type="submit"]',
+    footerSubscribeSuccess: ".alert-success",
 
     //Data
 
@@ -189,5 +194,11 @@ productsSearchButton: '',
         await expect(browser).toHaveUrl(accountCreatedUrl);
         await expect(accountCreatedSuccessMsg).toBeDisplayed();
         await expect(accountCreatedSuccessMsg).toHaveText(accountCreatedSuccessText);
+    },
+    //*TODO: Add startUpPage() to test.e2e,js
+    startUpPage: async function () {
+        const browserUrl = this.browserUrl;
+        await browser.url("/");
+        await expect(browser).toHaveUrl(browserUrl);
     },
 };
