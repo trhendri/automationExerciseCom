@@ -70,6 +70,11 @@ module.exports = {
     searchedProductsTitle: ".features_items>h2",
     displayedProducts: ".product-image-wrapper",
     displayedProductsItemName: " .product-image-wrapper p",
+    addToCartBtn: '//a[contains(text(), "Add to cart")]', //*!Double Check
+    products: ".single-products", //*!Prob use this one for TC 9 //Array
+    overlayContent: ".overlay-content",
+    productPageInfo: ".product-information",
+    viewProductButton: '//a[contains(@href, "product_details")]',
 
     //Subscription on HomePage
     footer: "#footer",
@@ -78,9 +83,13 @@ module.exports = {
     footerSubscribeSubmitBtn: '//button[@type="submit"]',
     footerSubscribeSuccess: ".alert-success",
 
+    cartBtn: '//a[@href="/view_cart"]',
+    modalConfirm: ".modal-confirm",
+    continueShoppingBtn: "button=Continue Shopping",
+
     //Data
 
-    validEmailAddress: "email@0kkjwo001.com",
+    validEmailAddress: "email@0k8r54001.com",
     validPassword: "password",
     invalidEmailAddress: "invalidemail@email.com",
     invalidPassword: "1",
@@ -112,26 +121,7 @@ module.exports = {
         await loginBtn.click();
     },
 
-    registerUser: async function (email, password) {
-        await browser.url("/");
-        const browserUrl = this.browserUrl;
-        const signupLoginBtn = $(this.signupLoginBtn);
-        const newUserSignUpText = $(this.newUserSignUpText);
-        const loginText = $(this.loginText);
-
-        await expect(browser).toHaveUrl(browserUrl);
-        await signupLoginBtn.click();
-        await expect(newUserSignUpText).toBeDisplayed();
-        await expect(loginText).toBeDisplayed();
-        await expect(newUserSignUpText).toHaveText("New User Signup!");
-
-        const registerNameField = await $(this.registerNameField);
-        const registerEmailField = await $(this.registerEmailField);
-        const signupBtn = await $(this.signupBtn);
-        // const registerTitle = await $$(this.registerTitle); // $$(".login-form h2")[0];
-        await registerNameField.setValue(email);
-        await registerEmailField.setValue(password);
-        await signupBtn.click();
+    registerUser: async function () {
         //await expect(registerTitle).toHaveText("ENTER ACCOUNT INFORMATION");
 
         const titleMrsRadio = await $(this.titleMrsRadio);

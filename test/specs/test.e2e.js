@@ -200,24 +200,36 @@ describe("Test Case 5", () => {
         const username = page.username;
         const newRegistrationEmailAddress = page.newRegistrationEmailAddress;
         //Launch Browser, Nav to site, Verify the homepage is visible
+        await page.startUpPage();
         //Click on Sign up/Login Button, Verify 'New User Sign up' is visible
+        const signupLoginBtn = $(page.signupLoginBtn);
+        const newUserSignUpText = $(page.newUserSignUpText);
+        const loginText = $(page.loginText);
+
+        await signupLoginBtn.click();
+        await expect(newUserSignUpText).toBeDisplayed();
+        await expect(loginText).toBeDisplayed();
+        await expect(newUserSignUpText).toHaveText("New User Signup!");
         //Register new User
-        await page.registerUser(username, newRegistrationEmailAddress);
+        const registerNameField = await $(page.registerNameField);
+        const registerEmailField = await $(page.registerEmailField);
+        const signupBtn = await $(page.signupBtn);
+        // const registerTitle = await $$(this.registerTitle); // $$(".login-form h2")[0];
+        await registerNameField.setValue(page.username);
+        await registerEmailField.setValue(page.validEmailAddress);
+        await signupBtn.click();
+
+        await page.registerUser();
 
         //Enter name and already registered email address, click 'Signup' button,
 
-        const signupLoginBtn = await $(page.signupLoginBtn);
         await signupLoginBtn.click();
         const logoutBtn = await $(page.logoutBtn);
         await logoutBtn.click();
 
-        const registerNameField = await $(page.registerNameField);
-        const registerEmailField = await $(page.registerEmailField);
-        const signUpBtn = await $(page.signupBtn);
-
         await registerNameField.setValue(username);
         await registerEmailField.setValue(newRegistrationEmailAddress);
-        await signUpBtn.click();
+        await signupBtn.click();
 
         //Verify error 'Email Address already Exist!' is visible.
 
@@ -370,7 +382,7 @@ xdescribe("Text Case 9", () => {
         }
            */
         //*! Figure out this For Of Loop. Its iterating over the same item but needs to cycle through all.
-
+        //*!Consider using
         for (const product of displayedProducts) {
             // Find the product name inside the product container
             const displayedProductsItemName = await product.$(page.displayedProductsItemName);
@@ -390,7 +402,7 @@ xdescribe("Text Case 9", () => {
     });
 });
 
-describe.only("Text Case 10", () => {
+describe("Text Case 10", () => {
     it("Verify Subscription in home page", async () => {
         //Launch Browser, Nav to url, verify page is visible
         await page.startUpPage();
@@ -422,30 +434,110 @@ describe.only("Text Case 10", () => {
     });
 });
 
+//*TODO: Start Checking if tests work here and below. Also Check variables
 describe("Test Case 11", () => {
     it("Verify Subscription in Cart page", async () => {
         //Launch Browser, Nav to url, verify page is visible
+        await page.startUpPage();
         //Click 'Cart' button, Scroll down to footer, Verify text "Subscription"
+        const cartBtn = await $(page.cartBtn);
+        await cartBtn.click();
+        const footer = await $(page.footer);
+        const subscriptionText = await $(page.subscriptionText);
+        await footer.scrollIntoView();
+        await expect(subscriptionText).toBeDisplayed();
+        await expect(subscriptionText).toHaveText("SUBSCRIPTION");
+        console.log(subscriptionText);
+
         //Enter email address in input and click arrow button.
+
+        const footerSubscribeEmailField = await $(page.footerSubscribeEmailField);
+        const footerSubscribeSubmitBtn = await $(page.footerSubscribeSubmitBtn);
+        await footerSubscribeEmailField.setValue(page.validEmailAddress);
+        await footerSubscribeSubmitBtn.click();
         //Verify success message 'You have been successfully subscribed!' is visible
-        console.log("test");
+        const footerSubscribeSuccess = await $(page.footerSubscribeSuccess);
+        await footerSubscribeSuccess.waitForDisplayed();
+
+        await expect(footerSubscribeSuccess).toBeDisplayed();
+        console.log(await footerSubscribeSuccess.getText());
+
+        await expect(footerSubscribeSuccess).toHaveText("You have been successfully subscribed!");
     });
 });
-
-describe("Test Case 12", () => {
+//*!Just Start over with this later.
+xdescribe("Test Case 12", () => {
     it("Add Products in Cart", async () => {
         //Launch browser, nav to url, verify page is visible
+        await page.startUpPage();
+
         //click 'Products' button, Hover over first product and click 'Add to cart',
+        const productsBtn = await $(page.productsBtn);
+        await productsBtn.click();
+        let products = await $$(page.products);
+        const firstProduct = await products[0];
+        await firstProduct.moveTo();
+
+        await browser.pause(1000);
+        const firstOverlayContent = await firstProduct.$(page.overlayContent);
+        const firstAddToCartBtn = await firstOverlayContent.$(page.addToCartBtn);
+
+        await firstAddToCartBtn.click();
+
         //Click 'Continue Shopping' button, Hover over second product and click 'Add to cart',
+        const modalConfirm = await $(page.modalConfirm);
+        await modalConfirm.waitForDisplayed();
+        const continueShoppingBtn = await $(page.continueShoppingBtn);
+        await browser.pause(3000);
+        await continueShoppingBtn.click();
+
+        products = await $$(page.products);
+
+        const secondProduct = await products[1];
+
+        await secondProduct.moveTo();
+
+        await browser.pause(2000);
+        const secondOverlayContent = await secondProduct.$(page.overlayContent);
+        const secondAddToCartBtn = await secondOverlayContent.$(page.addToCartBtn);
+        await secondAddToCartBtn.waitForDisplayed();
+        await secondAddToCartBtn.click();
+
+        await browser.pause(2000);
+
+        await modalConfirm.waitForDisplayed();
+        await continueShoppingBtn.click();
+
+        //*TODO: Make sure to pull variables about each item being added to cart to cross reference when its in the cart
+
         //Click 'View Cart' button, Verify both products are added to Cart
+        const cartBtn = await $(page.cartBtn);
+        await cartBtn.click();
+
         //Verify their prices, quantity and total price
     });
 });
 
-describe("Test Case 13", () => {
+//*!Just Start over with this later.
+
+xdescribe("Test Case 13", () => {
     it("Verify product quantity in Cart", async () => {
         //Launch browser, nav to url , verify home page is visible
+        await page.startUpPage();
+        const products = await $$(page.products);
+        const thirdProduct = await products[2];
+        const viewProductButton = await $(page.viewProductButton);
+        const thirdProductText = await thirdProduct.getText();
+        console.log(thirdProductText);
+
+        await viewProductButton.waitForDisplayed();
+        await thirdProduct.viewProductButton.click();
+
+        const productPageInfo = await $(page.productPageInfo).getText();
+        console.log(productPageInfo);
+
         //Click 'View Product' for any product on home page, verify product detail is opened
+
         //Increase quantity to 4, Click 'Add to cart' button, click 'View cart ' button,
         //Verify that product is displayed in cart page with exact quantity
     });
@@ -454,6 +546,7 @@ describe("Test Case 13", () => {
 describe("Test Case 14", () => {
     it("Place Order: Register while Checkout", async () => {
         //Launch browser, nav to url, verify homepage is visible
+        await page.startUpPage();
         //Add products to cart, click 'Cart' button, Verify that cart page is displayed
         //Click Proceed to Checkout, click 'Register/Login' button,
         //Fill all details in signup and create account, Verify 'ACCOUNT CREATED'
@@ -469,6 +562,7 @@ describe("Test Case 14", () => {
 describe("Test Case 15", () => {
     it("Place Order: Register before Checkout", async () => {
         // Launch browser, Navigate to url 'http://automationexercise.com', Verify that home page is visible successfully
+        await page.startUpPage();
         // Click 'Signup / Login' button, Fill all details in Signup and create account, Verify 'ACCOUNT CREATED!' and click 'Continue' button
         //Verify ' Logged in as username' at top
         //Add products to cart, Click 'Cart' button, Verify that cart page is displayed
@@ -482,6 +576,7 @@ describe("Test Case 15", () => {
 describe("Test Case 16", () => {
     it("Place Order: Login before Checkout", async () => {
         //1. Launch browser, Navigate to url 'http://automationexercise.com', Verify that home page is visible successfully
+        await page.startUpPage();
         //Click 'Signup / Login' button,  Fill email, password and click 'Login' button, Verify 'Logged in as username' at top
         //Add products to cart, Click 'Cart' button, Verify that cart page is displayed
         //Click Proceed To Checkout, Verify Address Details and Review Your Order
@@ -493,7 +588,148 @@ describe("Test Case 16", () => {
 describe("Test Case 17", () => {
     it("Remove Products From Cart", async () => {
         //Launch browser, Navigate to url 'http://automationexercise.com', Verify that home page is visible successfully
+        await page.startUpPage();
         //  Add products to cart, Click 'Cart' button, Verify that cart page is displayed
         //Click 'X' button corresponding to particular product, Verify that product is removed from the cart
+    });
+});
+
+describe("Test Case 18", () => {
+    it("View Category Products", async () => {
+        //Launch Browser, Nav to url, verify that categories are visible on the left side bar
+        await page.startUpPage();
+        const categories = await $(".category-products").getText();
+        console.log(categories);
+
+        await expect(categories.toLowerCase()).toContain("women", "men", "kids");
+
+        //Click on 'Women' category
+        const womenCategory = await $('//a[@href="#Women"]');
+        await womenCategory.click();
+        //Click on any category link under 'Women' category, for example: Dress
+        const dressCategory = await $("//a[@href and contains(text(), 'Dress')]");
+        await dressCategory.click();
+
+        //Verify that category page is displayed and confirm text 'WOMEN - TOPS PRODUCTS'
+        const dressTitle = await $(".title").getText();
+        console.log(dressTitle);
+        await expect(dressTitle.toLowerCase()).toContain("women - dress products");
+        //On left side bar, click on any sub-category link of 'Men' Category
+
+        const menCategory = await $('//a[@href="#Men"]');
+        await menCategory.click();
+        const jeansCategory = await $('//a[@href and contains(text(), "Jeans")]');
+        await jeansCategory.click();
+
+        //Verify that user is navigated to that category page
+        const jeansTitle = await $(".title").getText();
+        console.log(jeansTitle);
+        await expect(jeansTitle.toLowerCase()).toContain("men - jeans products");
+    });
+});
+
+describe("Test Case 19", () => {
+    it("View & Cart Brand Products", async () => {
+        //Launch browser, Navigate to url 'http://automationexercise.com', Click on 'Products' button, Verify that Brands are visible on left side bar
+        await page.startUpPage();
+        const productsButton = await $(page.productsBtn);
+        await productsButton.click();
+        const brandsTitle = await $('//h2[contains(text(), "Brands")]');
+        console.log(await brandsTitle.getText());
+        await expect(brandsTitle).toBeDisplayed();
+        //Click on any brand name, Verify that user is navigated to brand page and brand products are displayed
+        const poloBrand = await $('//a[@href="/brand_products/Polo"]');
+        await poloBrand.click();
+        const poloBrandTitle = await $(".title").getText();
+        console.log(poloBrandTitle);
+        await expect(poloBrandTitle.toLowerCase()).toContain("brand - polo products");
+        //On left side bar, click on any other brand link
+        const madameBrand = await $('//a[@href="/brand_products/Madame"]');
+        await madameBrand.click();
+        //Verify that user is navigated to that brand page and can see products
+        const madameBrandTitle = await $(".title").getText();
+        console.log(madameBrandTitle);
+        await expect(madameBrandTitle.toLowerCase()).toContain("brand - madame products");
+    });
+});
+
+describe("Test Case 20", () => {
+    it("Search Products and Verify Cart After Login", async () => {
+        // Launch browser, Navigate to url 'http://automationexercise.com, Click on 'Products' button,
+        //Verify user is navigated to ALL PRODUCTS page successfully
+        // Enter product name in search input and click search button, Verify 'SEARCHED PRODUCTS' is visible
+        // Verify all the products related to search are visible
+        // Add those products to cart, Click 'Cart' button and verify that products are visible in cart,
+        // Click 'Signup / Login' button and submit login details, Again, go to Cart page
+        //  Verify that those products are visible in cart after login as well
+    });
+});
+
+describe("Test Case 21", () => {
+    it("Add Review on product", async () => {
+        // Launch browser, Navigate to url 'http://automationexercise.com', Click on 'Products' button,
+        // Verify user is navigated to ALL PRODUCTS page successfully
+        // Click on 'View Product' button, Verify 'Write Your Review' is visible
+        //Enter name, email and review,  Click 'Submit' button, Verify success message 'Thank you for your review
+    });
+});
+
+describe("Test Case 22", () => {
+    it("Add to cart from Recommended items", async () => {
+        // Launch browser, Navigate to url 'http://automationexercise.com', Scroll to bottom of page
+        // Verify 'RECOMMENDED ITEMS' are visible
+        // Click on 'Add To Cart' on Recommended product, Click on 'View Cart' button,
+        // Verify that product is displayed in cart page
+    });
+});
+
+describe("Test Case 23", () => {
+    it("Verify address details in checkout page", async () => {
+        //     Launch browser, Navigate to url 'http://automationexercise.com', Verify that home page is visible successfully
+        //     Click 'Signup / Login' button, Fill all details in Signup and create account,
+        //       Verify 'ACCOUNT CREATED!' and click 'Continue' button
+        //     Verify ' Logged in as username' at top
+        //     Add products to cart, Click 'Cart' button, Verify that cart page is displayed
+        //     Click Proceed To Checkout,
+        //     Verify that the delivery address is same address filled at the time registration of account
+        //     Verify that the billing address is same address filled at the time registration of account
+        //     Click 'Delete Account' button, Verify 'ACCOUNT DELETED!' and click 'Continue' button
+    });
+});
+
+describe("Test Case 24", () => {
+    it("Download Invoice after purchase order", async () => {
+        // Launch browser, Navigate to url 'http://automationexercise.com', Verify that home page is visible successfully
+        //     Add products to cart, Click 'Cart' button, Verify that cart page is displayed
+        //      Click Proceed To Checkout, Click 'Register / Login' button,
+        //     Fill all details in Signup and create account,
+        //     Verify 'ACCOUNT CREATED!' and click 'Continue' button
+        //     Verify ' Logged in as username' at top, Click 'Cart' button, Click 'Proceed To Checkout' button,
+        //     Verify Address Details and Review Your Order,
+        //     Enter description in comment text area and click 'Place Order',
+        //     Enter payment details: Name on Card, Card Number, CVC, Expiration date,
+        //     Click 'Pay and Confirm Order' button,
+        //     Verify success message 'Your order has been placed successfully!'
+        //     Click 'Download Invoice' button and verify invoice is downloaded successfully.,
+        //     Click 'Continue' button, Click 'Delete Account' button,
+        //     Verify 'ACCOUNT DELETED!' and click 'Continue' button
+    });
+});
+
+describe("Test Case 25", () => {
+    it('Verify Scroll Up using "Arrow" button and Scroll Down functionality', async () => {
+        // Launch browser, Navigate to url 'http://automationexercise.com', Verify that home page is visible successfully
+        // Scroll down page to bottom, Verify 'SUBSCRIPTION' is visible
+        // Click on arrow at bottom right side to move upward,
+        // Verify that page is scrolled up and 'Full-Fledged practice website for Automation Engineers' text is visible on screen
+    });
+});
+
+describe("Test Case 26", () => {
+    it('Verify Scroll Up without "Arrow" button and Scroll Down functionality', async () => {
+        // Launch browser, Navigate to url 'http://automationexercise.com', Verify that home page is visible successfully
+        // Scroll down page to bottom, Verify 'SUBSCRIPTION' is visible
+        // Scroll up page to top,
+        //Verify that page is scrolled up and 'Full-Fledged practice website for Automation Engineers' text is visible on screen
     });
 });
