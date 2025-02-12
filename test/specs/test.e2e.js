@@ -2,6 +2,7 @@ const { expect, browser } = require("@wdio/globals");
 
 const page = require("../pageobjects/page");
 import path from "node:path";
+//import { browser, $, $$, expect } from '@wdio/globals'; 
 
 //AutomationExercises.com Project
 
@@ -653,33 +654,170 @@ describe("Test Case 19", () => {
     });
 });
 
-describe("Test Case 20", () => {
+describe.only("Test Case 20", () => {
     it("Search Products and Verify Cart After Login", async () => {
         // Launch browser, Navigate to url 'http://automationexercise.com, Click on 'Products' button,
+
+        await page.startUpPage();
+        const productsButton = await $(page.productsBtn);
+        await productsButton.click();
+
+
+
         //Verify user is navigated to ALL PRODUCTS page successfully
+        const productsText = 'ALL PRODUCTS';
+        const productsSection = $('.features_items');
+        await expect(productsSection).toHaveText(expect.stringContaining(productsText));
         // Enter product name in search input and click search button, Verify 'SEARCHED PRODUCTS' is visible
+        const searchField = await $(page.productsSearchInput);
+        const searchButton = await $(page.productsSearchButton);
+        await searchField.click();
+        await searchField.setValue('Dress');
+        await searchButton.click();
+        const searchedProductsText = 'SEARCHED PRODUCTS';
+        const searchProductsSection = $('.features_items');
+        await expect(searchProductsSection).toHaveText(expect.stringContaining(searchedProductsText));
+
         // Verify all the products related to search are visible
+        const productsPageUrl = await browser.getUrl();
+        const urlSearchTerm = /.*search=Dress/;
+        console.log(productsPageUrl);
+        console.log(urlSearchTerm);
+        await expect(productsPageUrl).toMatch(urlSearchTerm);
+
+
+        const itemNames = [];
         // Add those products to cart, Click 'Cart' button and verify that products are visible in cart,
+        //! Working Loop!
+        const searchPageProducts = await $$('.product-image-wrapper');
+        for (const eachProduct of searchPageProducts) {
+            const productImg = await eachProduct.$('.product-image-wrapper img'); //* Also remember to call each individual product in the loop on which to add the actions.
+            await productImg.scrollIntoView();
+            await productImg.moveTo();
+            await browser.pause(1000);
+            // const overlay = await eachProduct.$('.product-image-wrapper .product-overlay');
+            const addToCartButton = await eachProduct.$$('a.add-to-cart')[1]; //* Remember to double check if there are multiples of the elements and or try an array.
+            await addToCartButton.click();
+            const addedToCartModal = await $('.modal-content');
+            await addedToCartModal.waitForDisplayed({ timeout: 12000 });
+            const continueShoppingButton = await $('button=Continue Shopping');
+            await continueShoppingButton.waitForClickable();
+            await continueShoppingButton.click();
+            const productName = await eachProduct.$('.productinfo p').getText();
+
+            itemNames.push(productName);
+            console.log(itemNames);
+
+
+        }
+
+        const cartButton = await $(page.cartBtn);
+        await cartButton.click();
+        const cartItems = await $('#cart_info_table').getText();
+
+        for (const name of itemNames) {//* here we can loop through each item in our itemNames array and compare it with the cartItems Text to confirm if it exists in the cart.
+            await expect(cartItems).toContain(name);
+        }
+
+
         // Click 'Signup / Login' button and submit login details, Again, go to Cart page
+        const signupLoginButton = await $(page.signupLoginBtn);
+        await signupLoginButton.click();
+        const loginEmailField = await $(page.loginEmailField);
+        const loginPasswordField = await $(page.loginPasswordField);
+        const validEmail = page.validEmailAddress;
+        const validPassword = page.validPassword;
+        const loginButton = await $(page.loginBtn);
+
+        await loginEmailField.setValue(validEmail);
+        await loginPasswordField.setValue(validPassword);
+        await loginButton.click();
+        await cartButton.click();
+
+
         //  Verify that those products are visible in cart after login as well
+        for (const name of itemNames) {//* here we can loop through each item in our itemNames array and compare it with the cartItems Text to confirm if it exists in the cart.
+            await expect(cartItems).toContain(name);
+        }
     });
 });
 
 describe("Test Case 21", () => {
     it("Add Review on product", async () => {
         // Launch browser, Navigate to url 'http://automationexercise.com', Click on 'Products' button,
+        await page.startUpPage();
+        await $(page.productsBtn).click();
         // Verify user is navigated to ALL PRODUCTS page successfully
+        const productText = 'ALL PRODUCTS';
+        const allProductsText = await $('.features_items');
+
+
+        await expect(allProductsText).toHaveText(expect.stringContaining(productText));
         // Click on 'View Product' button, Verify 'Write Your Review' is visible
+        const viewProductButton = await $(page.viewProductButton);
+        await viewProductButton.click();
+        const reviewText = 'WRITE YOUR REVIEW';
+        const reviewTitle = await $('//a[@href="#reviews"]');
+        await expect(reviewTitle).toHaveText(expect.stringContaining(reviewText));
+
+
         //Enter name, email and review,  Click 'Submit' button, Verify success message 'Thank you for your review
+        const reviewNameField = await $('#name');
+        const reviewEmailField = await $('#email');
+        const reviewTextInputField = await $('#review');
+        const submitReviewButton = await $('#button-review');
+
+        const reviewSuccessText = 'Thank you for your review';
+        const reviewSuccessMessage = $('.alert-success.alert');
+
+        await reviewNameField.setValue('Name Name');
+        await reviewEmailField.setValue('TesterTestTest@email.com');
+        await reviewTextInputField.setValue('This is a review. I am reviewing.');
+        await submitReviewButton.click();
+        await expect(reviewSuccessMessage).toHaveText(expect.stringContaining(reviewSuccessText));
+
     });
 });
 
 describe("Test Case 22", () => {
     it("Add to cart from Recommended items", async () => {
         // Launch browser, Navigate to url 'http://automationexercise.com', Scroll to bottom of page
+        await page.startUpPage();
+        const recommendedItems = $('.recommended_items');
+        await recommendedItems.scrollIntoView();
+        const recommendedItemsText = 'RECOMMENDED ITEMS';
+
+
+
         // Verify 'RECOMMENDED ITEMS' are visible
+        await expect(recommendedItems).toHaveText(expect.stringContaining(recommendedItemsText));
         // Click on 'Add To Cart' on Recommended product, Click on 'View Cart' button,
+        const recItemsProduct = await $(`a[data-product-id="5"]`).parentElement();
+
+        await browser.pause(3000);
+        await recItemsProduct.waitForDisplayed();
+
+        const itemName = await $('//div[@id="recommended-item-carousel"]/div/div[2]/div[2]/div/div/div/p').getText(); //#recommended-item-carousel > div > div:nth-child(2) > div:nth-child(2) > div > div > div > img
+        const addToCartButton = await $$('//a[@data-product-id="5"]')[2]; //find class for that spec product
+        await addToCartButton.waitForDisplayed();
+
+        await addToCartButton.click();
+        const addToCartModal = await $('.modal-content');
+        await addToCartModal.waitForDisplayed();
+        const modalViewCartButton = await $('.modal-content a');
+        await modalViewCartButton.click();
+        const cartItems = await $('#cart_info_table').getText();
+
+        //With selector chaining, it's way easier. Simply narrow down the desired element step by step:
+
+        // await $('.row .entry:nth-child(2)').$('button*=Add').click()
+
+
+
         // Verify that product is displayed in cart page
+        console.log(itemName);
+        await expect(cartItems).toContain(itemName);
+
     });
 });
 

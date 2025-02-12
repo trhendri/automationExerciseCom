@@ -190,5 +190,5 @@ module.exports = {
         const browserUrl = this.browserUrl;
         await browser.url("/");
         await expect(browser).toHaveUrl(browserUrl);
-    },
+    }
 };
