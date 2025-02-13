@@ -142,11 +142,7 @@ module.exports = {
         const cityField = await $(this.cityField);
         const zipcodeField = await $(this.zipcodeField);
         const mobileNumField = await $(this.mobileNumField);
-        const createAccountBtn = await $(this.createAccountBtn);
-
-        const accountCreatedSuccessText = "ACCOUNT CREATED!";
-        const accountCreatedUrl = "https://www.automationexercise.com/account_created";
-        const accountCreatedSuccessMsg = $(this.accountCreatedSuccessMsg);
+        
 
         const user = {
             firstName: "Jane",
@@ -179,12 +175,31 @@ module.exports = {
         await cityField.setValue(user.state);
         await zipcodeField.setValue(user.zipcode);
         await mobileNumField.setValue(user.mobileNum);
+      
 
+        // await createAccountBtn.click();
+        // await expect(browser).toHaveUrl(accountCreatedUrl);
+        // await expect(accountCreatedSuccessMsg).toBeDisplayed();
+        // await expect(accountCreatedSuccessMsg).toHaveText(accountCreatedSuccessText);
+        
+    },
+
+    clickCreateAccount: async function(){
+        const createAccountBtn = await $(this.createAccountBtn);
         await createAccountBtn.click();
+
+    },
+    confirmAccountCreated: async function(){
+        const accountCreatedUrl =  this.accountCreatedUrl;
+        const accountCreatedSuccessMsg = await $(this.accountCreatedSuccessMsg);
+        const accountCreatedSuccessText =  this.accountCreatedSuccessText;
         await expect(browser).toHaveUrl(accountCreatedUrl);
         await expect(accountCreatedSuccessMsg).toBeDisplayed();
         await expect(accountCreatedSuccessMsg).toHaveText(accountCreatedSuccessText);
+
     },
+
+
     //*TODO: Add startUpPage() to test.e2e,js
     startUpPage: async function () {
         const browserUrl = this.browserUrl;

@@ -217,10 +217,13 @@ describe("Test Case 5", () => {
         const signupBtn = await $(page.signupBtn);
         // const registerTitle = await $$(this.registerTitle); // $$(".login-form h2")[0];
         await registerNameField.setValue(page.username);
-        await registerEmailField.setValue(page.validEmailAddress);
+        const validEmailAddress = 'emailemaiadf0jdjdjd@gmail.com'
+        await registerEmailField.setValue(validEmailAddress);
         await signupBtn.click();
 
         await page.registerUser();
+        await page.clickCreateAccount();
+        await page.confirmAccountCreated();
 
         //Enter name and already registered email address, click 'Signup' button,
 
@@ -560,17 +563,161 @@ describe("Test Case 14", () => {
     });
 });
 
-describe("Test Case 15", () => {
+describe.only("Test Case 15", () => {
     it("Place Order: Register before Checkout", async () => {
         // Launch browser, Navigate to url 'http://automationexercise.com', Verify that home page is visible successfully
         await page.startUpPage();
         // Click 'Signup / Login' button, Fill all details in Signup and create account, Verify 'ACCOUNT CREATED!' and click 'Continue' button
+        const signupLoginButton = await $(page.signupLoginBtn)
+        await signupLoginButton.click();
+        const registerNameField = await $(page.registerNameField);
+        const registerEmailField = await $(page.registerEmailField);
+
+        const validEmail = 'email00000@emalll.com';
+        const validPassword = page.validPassword;
+        const username = page.username;
+
+        await registerNameField.setValue(username);
+        await registerEmailField.setValue(validEmail);
+        const signupButton = await $(page.signupBtn);
+        await signupButton.click();
+
+
+
+        await page.registerUser();
+        const registrationData = [];
+        const registrationDataFields = await $$('.login-form .form-control');
+
+        //Cycle through data and pull values, and add to array
+        for (const registrationField of registrationDataFields) {
+
+            const eachField = await registrationField.getValue();
+            //Skip Email field
+            if (eachField === validEmail || validPassword) { //exclude email and password fields from array
+                continue; // Skip this iteration if the product should be excluded
+            }
+
+            registrationData.push(eachField);
+            console.log('1');
+
+        }
+
+        console.log(registrationData);
+        await page.clickCreateAccount();
+        await page.confirmAccountCreated();
+
+
+        const registrationContinueButton = await $('//a[@data-qa="continue-button"]');
+        await registrationContinueButton.click();
+
         //Verify ' Logged in as username' at top
+        const userLoggedInAs = await $('.shop-menu').getText();
+        await expect(userLoggedInAs).toContain('Logged in as ' + username);
         //Add products to cart, Click 'Cart' button, Verify that cart page is displayed
+        const itemNames = []
+        let productName;
+
+        const searchPageProducts = await $$('.product-image-wrapper');
+
+        //Cycle through 5 products and add to cart, add item name to array
+
+        for (let i = 0; i < 5 && i < searchPageProducts.length; i++) {
+            const eachProduct = searchPageProducts[i];
+            const productImg = await eachProduct.$('.product-image-wrapper img'); //* Also remember to call each individual product in the loop on which to add the actions.
+            await productImg.scrollIntoView();
+            await productImg.moveTo();
+            //await browser.pause(1000);
+
+            const addToCartButton = await eachProduct.$$('a.add-to-cart')[1]; //* Remember to double check if there are multiples of the elements and or try an array.
+            await addToCartButton.waitForClickable();
+            await addToCartButton.click();
+            const addedToCartModal = await $('.modal-content');
+            await addedToCartModal.waitForDisplayed({ timeout: 12000 });
+            const continueShoppingButton = await $('button=Continue Shopping');
+            await continueShoppingButton.waitForClickable();
+            await continueShoppingButton.click();
+            productName = await eachProduct.$('.productinfo p').getText();
+
+
+
+
+            itemNames.push(productName);
+        }
+        console.log(itemNames);
+
+        const cartButton = await $(page.cartBtn);
+        await cartButton.click();
+        const breadcrumb = await $('.breadcrumbs');
+        await expect(breadcrumb).toHaveText(expect.stringContaining('Shopping Cart'));
+
+
         //Click Proceed To Checkout, Verify Address Details and Review Your Order
-        //Enter description in comment text area and click 'Place Order', Enter payment details: Name on Card, Card Number, CVC, Expiration date,
+        const proceedToCheckoutButton = await $('#do_action .check_out');
+        await proceedToCheckoutButton.click();
+
+        //cycle through and compare item names to check out page items
+
+        const cartItems = await $('#cart_items').getText();
+        for (const name of itemNames) {//* here we can loop through each item in our itemNames array and compare it with the cartItems Text to confirm if it exists in the cart.
+            await expect(cartItems).toContain(name);
+        }
+        const checkoutAddressDetails = await $('#cart_items .container').getText();
+
+        //cycle through and compare registration field data to checkout address and billing page
+        for (const dataItem of registrationData) {
+            await expect(checkoutAddressDetails).toContain(dataItem);
+        }
+
+        console.log('Finished Final Loop');
+
+
+        //Enter description in comment text area and click 'Place Order',
+        const commentBox = await $('//textarea[@name="message"]');
+        await commentBox.scrollIntoView();
+        await commentBox.setValue('This is a comment in the comment box about my order');
+        const placeOrderButton = await $('.check_out.btn');
+        await placeOrderButton.click();
+
+        //Enter payment details: Name on Card, Card Number, CVC, Expiration date,
+        const nameOnCardField = await $('//input[@data-qa="name-on-card"]');
+        const cardNumberField = await $('//input[@data-qa="card-number"]');
+        const cvcField = await $('//input[@data-qa="cvc"]');
+        const expirationMonthField = await $('//input[@data-qa="expiry-month"]');
+        const expirationYearField = await $('//input[@data-qa="expiry-year"]');
+
+        const fakeCreditCard = {
+            name: page.username,
+            cardNumber: '5383191275681644',
+            cvc: '123',
+            expirationMonth: '12',
+            expirationYear: '3009'
+
+
+        }
+
+        await nameOnCardField.setValue(fakeCreditCard.name);
+        await cardNumberField.setValue(fakeCreditCard.cardNumber);
+        await cvcField.setValue(fakeCreditCard.cvc);
+        await expirationMonthField.setValue(fakeCreditCard.expirationMonth);
+        await expirationYearField.setValue(fakeCreditCard.expirationYear);
+
         //Click 'Pay and Confirm Order' button, Verify success message 'Your order has been placed successfully!'
+        const payAndConfirmOrderButton = await $('button=Pay and Confirm Order');
+        await payAndConfirmOrderButton.click();
+        const orderPlacedMessage = 'Your order has been placed successfully!';
+        const orderPlacedMessage2 = 'Congratulations! Your order has been confirmed!';
+        const orderPlacedConfirmed = await $('#form p').getText();
+
+
+        await expect(orderPlacedConfirmed).toContain(orderPlacedMessage2);
         //Click 'Delete Account' button, Verify 'ACCOUNT DELETED!' and click 'Continue' button
+        const deleteAccountButton = await $(page.deleteAccountBtn);
+        await deleteAccountButton.click();
+        const accountDeletedText = 'ACCOUNT DELETED!'
+        const accountDeletedSection = await $('.title').getText();
+        await expect(accountDeletedSection).toContain(accountDeletedText);
+        const deletedContinueButton = await $('a[data-qa="continue-button"]');
+        await deletedContinueButton.click();
     });
 });
 
@@ -657,7 +804,7 @@ describe("Test Case 19", () => {
 //! BEST ONE SO FAR
 //BEST ONE SO FAR
 
-describe.only("Test Case 20", () => {
+describe("Test Case 20", () => {
     it("Search Products and Verify Cart After Login", async () => {
         // Launch browser, Navigate to url 'http://automationexercise.com, Click on 'Products' button,
 
