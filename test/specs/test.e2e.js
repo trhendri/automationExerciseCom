@@ -469,81 +469,143 @@ describe("Test Case 11", () => {
         await expect(footerSubscribeSuccess).toHaveText("You have been successfully subscribed!");
     });
 });
-//*!Just Start over with this later.
-xdescribe("Test Case 12", () => {
+
+describe("Test Case 12", () => {
     it("Add Products in Cart", async () => {
         //Launch browser, nav to url, verify page is visible
         await page.startUpPage();
 
         //click 'Products' button, Hover over first product and click 'Add to cart',
-        const productsBtn = await $(page.productsBtn);
-        await productsBtn.click();
-        let products = await $$(page.products);
-        const firstProduct = await products[0];
+        const productsAdded = [];
+        const itemPrices = [];
+        const itemQuantities = [];
+
+        const productsButton = await $(page.productsBtn);
+        await productsButton.click();
+
+        const firstProduct = await $('.product-image-wrapper');
+        const firstProductName = await firstProduct.$('.productinfo p').getText();
+        const firstItemPrice = await firstProduct.$('.productinfo h2').getText();
+
+        console.log(firstItemPrice);
+        productsAdded.push(firstProductName);
+        console.log('pushed first product to array')
+        await firstProduct.scrollIntoView();
         await firstProduct.moveTo();
+        await firstProduct.$$('a.add-to-cart')[1].click();
 
-        await browser.pause(1000);
-        const firstOverlayContent = await firstProduct.$(page.overlayContent);
-        const firstAddToCartBtn = await firstOverlayContent.$(page.addToCartBtn);
 
-        await firstAddToCartBtn.click();
+        console.log('clicked add to cart for first product')
+        const addToCartModal = await $('.modal-content');
+        await addToCartModal.waitForDisplayed();
 
-        //Click 'Continue Shopping' button, Hover over second product and click 'Add to cart',
-        const modalConfirm = await $(page.modalConfirm);
-        await modalConfirm.waitForDisplayed();
-        const continueShoppingBtn = await $(page.continueShoppingBtn);
-        await browser.pause(3000);
-        await continueShoppingBtn.click();
 
-        products = await $$(page.products);
 
-        const secondProduct = await products[1];
+        // Click 'Continue Shopping' button, Hover over second product and click 'Add to cart',
+        const continueShoppingButton = await $(page.continueShoppingBtn);
+        await continueShoppingButton.click();
 
+
+        const secondProduct = await $$('.product-image-wrapper')[1];
+        console.log('secondProduct declared')
+        const secondProductName = await secondProduct.$('.productinfo p').getText();
+        const secondProductPrice = await secondProduct.$('.productinfo h2').getText();
+
+        
+        productsAdded.push(secondProductName);
+        console.log(productsAdded);
         await secondProduct.moveTo();
+        await secondProduct.$$('a.add-to-cart')[1].click();
 
-        await browser.pause(2000);
-        const secondOverlayContent = await secondProduct.$(page.overlayContent);
-        const secondAddToCartBtn = await secondOverlayContent.$(page.addToCartBtn);
-        await secondAddToCartBtn.waitForDisplayed();
-        await secondAddToCartBtn.click();
+        console.log('clicked second products add to cart button');
+        await addToCartModal.waitForDisplayed();
 
-        await browser.pause(2000);
-
-        await modalConfirm.waitForDisplayed();
-        await continueShoppingBtn.click();
 
         //*TODO: Make sure to pull variables about each item being added to cart to cross reference when its in the cart
 
         //Click 'View Cart' button, Verify both products are added to Cart
-        const cartBtn = await $(page.cartBtn);
-        await cartBtn.click();
+        const viewCartButton = await $('.modal-content').$('a');
+        await viewCartButton.click();
+        const cartItemsPage = await $('#cart_items').getText();
+        console.log(cartItemsPage);
+
+        for (const name of productsAdded) {
+            await expect(cartItemsPage).toContain(name);
+        }
+
+//! REDO this part
 
         //Verify their prices, quantity and total price
+        const firstProductPriceSlice = await firstItemPrice.slice(4);
+        console.log(firstProductPriceSlice);
+        itemPrices.push(firstProductPriceSlice);
+        const secondProductPriceSlice = await secondProductPrice.slice(4);
+        console.log(secondProductPriceSlice);
+        itemPrices.push(secondProductPriceSlice);
+        console.log(itemPrices);
+
+        let index = 0;
+
+        for (const itemPrice of itemPrices) {
+            const cartRows = await $$('tbody tr');
+            const cartRow = cartRows[index];
+            const rowText = await cartRow.getText();
+        
+            await expect(rowText).toContain(itemPrice);
+           
+
+        }
+
+        const firstProductQuantity = await $$('#quantity')[0].getText();
+        const secondProductQuantity = await $$('#quantity')[1].getText();
+
+        const totalPriceOfEachItem = await $$('.cart_total');
+        await expect(firstProductPriceSlice * firstProductQuantity).toEqual(totalPriceOfEachItem[0]);
+        await expect(secondProductPriceSlice * secondProductQuantity).toEqual(totalPriceOfEachItem[1]);
+
+
+
+
+
     });
 });
 
-//*!Just Start over with this later.
+//! Push this one.
 
-xdescribe("Test Case 13", () => {
+describe("Test Case 13", () => {
     it("Verify product quantity in Cart", async () => {
         //Launch browser, nav to url , verify home page is visible
         await page.startUpPage();
-        const products = await $$(page.products);
-        const thirdProduct = await products[2];
-        const viewProductButton = await $(page.viewProductButton);
-        const thirdProductText = await thirdProduct.getText();
-        console.log(thirdProductText);
 
-        await viewProductButton.waitForDisplayed();
-        await thirdProduct.viewProductButton.click();
-
-        const productPageInfo = await $(page.productPageInfo).getText();
-        console.log(productPageInfo);
 
         //Click 'View Product' for any product on home page, verify product detail is opened
+        const viewProductButton = await $(page.viewProductButton);
+        const productInfo = await $('.productinfo p').getText();
+        console.log(productInfo);
+        await viewProductButton.click();
+        const productInformationPage = await $('.product-information').getText();
+        console.log(productInformationPage);
+        await expect(productInformationPage).toContain(productInfo);
+
+
+
 
         //Increase quantity to 4, Click 'Add to cart' button, click 'View cart ' button,
         //Verify that product is displayed in cart page with exact quantity
+        const productQuantity = await $('#quantity');
+        await productQuantity.setValue('3');
+        const confirmQuantity = await productQuantity.getValue();
+        const addToCartButton = await $('button=Add to cart');
+        await addToCartButton.click();
+        const viewCart = await $('.modal-content').$('a');
+        await viewCart.click();
+        const cartInfo = await $('#cart_info').getText();
+        await expect(cartInfo).toContain(productInfo);
+        const cartQuantity = await $('.cart_quantity').getText();
+        await expect(cartQuantity).toEqual(confirmQuantity);
+
+
+
     });
 });
 
@@ -563,7 +625,7 @@ describe("Test Case 14", () => {
     });
 });
 
-describe.only("Test Case 15", () => {
+describe("Test Case 15", () => {
     it("Place Order: Register before Checkout", async () => {
         // Launch browser, Navigate to url 'http://automationexercise.com', Verify that home page is visible successfully
         await page.startUpPage();
